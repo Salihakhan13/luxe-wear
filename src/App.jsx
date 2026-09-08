@@ -18,7 +18,80 @@ const [showCheckout, setShowCheckout] = useState(false);
 const [orderPlaced, setOrderPlaced] = useState(false);
 const [checkoutError, setCheckoutError] = useState("");
 const [paymentMethod, setPaymentMethod] = useState("COD");
-const [products, setProducts] = useState([]);
+const [products, setProducts] = useState([
+  {
+    id: 11,
+    name: "Classic White Shirt",
+    category: "Men",
+    price: 1299,
+    image: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=500",
+    description: "Classic white shirt for men",
+    stock: 20
+  },
+  {
+    id: 12,
+    name: "Elegant Summer Dress",
+    category: "Women",
+    price: 1899,
+    image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500",
+    description: "Elegant summer dress for women",
+    stock: 15
+  },
+  {
+    id: 3,
+    name: "Casual Denim Jacket",
+    category: "Men",
+    price: 2499,
+    image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500",
+    description: "Casual denim jacket for men",
+    stock: 10
+  },
+  {
+    id: 4,
+    name: "Women's Casual Top",
+    category: "Women",
+    price: 999,
+    image: "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=500",
+    description: "Comfortable casual top for women",
+    stock: 25
+  },
+  {
+    id: 5,
+    name: "Kids Casual T-Shirt",
+    category: "Kids",
+    price: 699,
+    image: "https://images.unsplash.com/photo-1503919545889-aef636e10ad4?w=500",
+    description: "Casual t-shirt for kids",
+    stock: 30
+  },
+  {
+    id: 6,
+    name: "Kids Denim Outfit",
+    category: "Kids",
+    price: 899,
+    image: "https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?w=500",
+    description: "Stylish denim outfit for kids",
+    stock: 18
+  },
+  {
+    id: 7,
+    name: "Classic Sale Shirt",
+    category: "Sale",
+    price: 799,
+    image: "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=500",
+    description: "Classic shirt on sale",
+    stock: 12
+  },
+  {
+    id: 8,
+    name: "Elegant Sale Dress",
+    category: "Sale",
+    price: 1199,
+    image: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=500",
+    description: "Elegant dress on sale",
+    stock: 14
+  }
+]);
 const [orders, setOrders] = useState([]);
 useEffect(() => {
   fetch("http://localhost:8080/api/products")
