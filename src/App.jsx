@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 
 function App() {
@@ -17,65 +17,20 @@ const [isRegister, setIsRegister] = useState(false);
 const [showCheckout, setShowCheckout] = useState(false);
 const [orderPlaced, setOrderPlaced] = useState(false);
 const [checkoutError, setCheckoutError] = useState("");
-  const products = [
-    {
-      id: 1,
-      name: "Classic White Shirt",
-      category: "Men",
-      price: 1299,
-      image: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=500",
-    },
-    {
-      id: 2,
-      name: "Elegant Summer Dress",
-      category: "Women",
-      price: 1899,
-      image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500",
-    },
-    {
-      id: 3,
-      name: "Casual Denim Jacket",
-      category: "Men",
-      price: 2499,
-      image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500",
-    },
-    {
-      id: 4,
-      name: "Women's Casual Top",
-      category: "Women",
-      price: 999,
-      image: "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=500",
-    },
-    {
-  id: 5,
-  name: "Kids Casual T-Shirt",
-  category: "Kids",
-  price: 699,
-  image: "https://images.unsplash.com/photo-1503919545889-aef636e10ad4?w=500",
-},
-{
-  id: 6,
-  name: "Kids Denim Outfit",
-  category: "Kids",
-  price: 899,
-  image: "https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?w=500",
-},
-{
-  id: 7,
-  name: "Classic Sale Shirt",
-  category: "Sale",
-  price: 799,
-  image: "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=500",
-},
-{
-  id: 8,
-  name: "Elegant Sale Dress",
-  category: "Sale",
-  price: 1199,
-  image: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=500",
-},
-  ];
-
+const [paymentMethod, setPaymentMethod] = useState("COD");
+const [products, setProducts] = useState([]);
+const [orders, setOrders] = useState([]);
+useEffect(() => {
+  fetch("http://localhost:8080/api/products")
+    .then((response) => response.json())
+    .then((data) => {
+      setProducts(data);
+    })
+    .catch((error) => {
+  console.error("Error fetching products:", error);
+});
+}, []);
+  
   return (
     <div className="app">
       {/* Navbar */}
@@ -392,7 +347,47 @@ const [checkoutError, setCheckoutError] = useState("");
                     <p>{item.category}</p>
                     <h3>{item.name}</h3>
                     <strong>₹{item.price}</strong>
-                    <p>Quantity: {item.quantity || 1}</p>
+                    <div className="quantity-control">
+  <button
+    type="button"
+    onClick={() => {
+      if ((item.quantity || 1) > 1) {
+        setCart(
+          cart.map((cartItem, i) =>
+            i === index
+              ? {
+                  ...cartItem,
+                  quantity: (cartItem.quantity || 1) - 1,
+                }
+              : cartItem
+          )
+        );
+      }
+    }}
+  >
+    −
+  </button>
+
+  <span>{item.quantity || 1}</span>
+
+  <button
+    type="button"
+    onClick={() => {
+      setCart(
+        cart.map((cartItem, i) =>
+          i === index
+            ? {
+                ...cartItem,
+                quantity: (cartItem.quantity || 1) + 1,
+              }
+            : cartItem
+        )
+      );
+    }}
+  >
+    +
+  </button>
+</div>
                     {item.size && <p>Size: {item.size}</p>}
 {item.color && <p>Color: {item.color}</p>}
                   </div>
@@ -467,6 +462,10 @@ const [checkoutError, setCheckoutError] = useState("");
           type="tel"
           placeholder="Phone Number"
         />
+        <input
+  type="email"
+  placeholder="Email Address"
+/>
 
         <input
           type="text"
@@ -483,6 +482,31 @@ const [checkoutError, setCheckoutError] = useState("");
             type="text"
             placeholder="Pincode"
           />
+          <div style={{ marginTop: "15px" }}>
+  <h3>Payment Method</h3>
+
+  <label style={{ marginRight: "20px" }}>
+    <input
+      type="radio"
+      name="payment"
+      value="COD"
+      checked={paymentMethod === "COD"}
+      onChange={(e) => setPaymentMethod(e.target.value)}
+    />
+    Cash on Delivery
+  </label>
+
+  <label>
+    <input
+      type="radio"
+      name="payment"
+      value="UPI"
+      checked={paymentMethod === "UPI"}
+      onChange={(e) => setPaymentMethod(e.target.value)}
+    />
+    UPI
+  </label>
+</div>
         </div>
         {checkoutError && (
   <p className="checkout-error">
@@ -492,26 +516,94 @@ const [checkoutError, setCheckoutError] = useState("");
 <button
   className="place-order-btn"
   onClick={() => {
-  const inputs = document.querySelectorAll(
-    ".checkout-form input"
-  );
+    const inputs = document.querySelectorAll(
+      ".checkout-form input"
+    );
 
-  const allFilled = [...inputs].every(
-    (input) => input.value.trim() !== ""
-  );
+    const name = inputs[0].value.trim();
+    const phone = inputs[1].value.trim();
+    const email = inputs[2].value.trim();
+    const address = inputs[3].value.trim();
+    const city = inputs[4].value.trim();
+    const pincode = inputs[5].value.trim();
 
-  if (!allFilled) {
-    setCheckoutError("Please fill all delivery information.");
-    return;
-  }
+    const allFilled = [
+      name,
+      phone,
+      email,
+      address,
+      city,
+      pincode
+    ].every((value) => value !== "");
 
-  setCheckoutError("");
-  setCart([]);
-  setShowCheckout(false);
-  setOrderPlaced(true);
-}}
+    if (!allFilled) {
+      setCheckoutError("Please fill all delivery information.");
+      return;
+    }
+
+    const totalAmount = cart.reduce(
+      (total, item) =>
+        total + item.price * (item.quantity || 1),
+      0
+    );
+
+    fetch("http://localhost:8080/api/orders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        customerName: name,
+        email: email,
+        phone: phone,
+        address: `${address}, ${city}, ${pincode}`,
+        paymentMethod: paymentMethod,
+        totalAmount: totalAmount
+      })
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to place order");
+        }
+        return response.json();
+      })
+      .then(() => {
+        setCheckoutError("");
+        setCart([]);
+        setShowCheckout(false);
+        setOrderPlaced(true);
+      })
+      .catch((error) => {
+        console.error("Error placing order:", error);
+        setCheckoutError(
+          "Unable to place order. Please try again."
+        );
+      });
+  }}
 >
   Place Order
+</button>
+<button
+  type="button"
+  style={{
+    marginTop: "10px",
+    padding: "10px 20px",
+    cursor: "pointer"
+  }}
+  onClick={() => {
+    const message = `Hello LUXEWEAR, I want to place an order. Total Amount: ₹${cart.reduce(
+      (total, item) =>
+        total + item.price * (item.quantity || 1),
+      0
+    )}`;
+
+    window.open(
+      `https://wa.me/?text=${encodeURIComponent(message)}`,
+      "_blank"
+    );
+  }}
+>
+  Order via WhatsApp
 </button>
       </div>
 
